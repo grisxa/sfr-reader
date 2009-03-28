@@ -1,6 +1,6 @@
 /* 
    SFR base structure declaration
-   Based on BaseMemStruct.h by Sport System (www.sportsystem.ru)
+   Based on BaseMemStruct.h by Sport Service (www.sportsystem.ru)
 
    Copyright (C) 2009 Grigory Batalov <bga@altlinux.org>
 
