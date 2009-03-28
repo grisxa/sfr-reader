@@ -36,8 +36,6 @@
 
 extern int errno;
 
-#define ADDR_COUNT 49152
-
 #define finalize(a) bufferize(a, sizeof(a))
 #define BUF_SIZE 4096
 #define BUF_CHUNK 256
