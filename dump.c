@@ -19,8 +19,6 @@
    MA 02111-1307, USA.
 */
 
-#define _GNU_SOURCE
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -47,7 +45,7 @@ char *bufferize (char *str, size_t size)
     size = BUF_CHUNK - 1;
 
   // move cursor beyond the current string
-  ptr += strnlen (ptr, sizeof (buf) - (ptr - buf)) + 1;
+  ptr += strlen (ptr) + 1;
   // if there is no place, go to beginning
   if (ptr - buf > sizeof (buf) - size - 1)
     ptr = buf;
