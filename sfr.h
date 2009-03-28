@@ -136,8 +136,8 @@ struct Competitor {
 //Запись, описывающая одного участника во время соревнований
   int32_t Code;			//Уникальный идентификатор
   int32_t StNum;		//Нагрудный номер
-  char Family[16];		//Фамилия
   char Name[16];		//Имя
+  char Family[16];		//Фамилия
   int32_t GroupCode;		//Код группы
   int32_t TeamCode;		//Код команды
   int32_t Qualif;		//Разряд
