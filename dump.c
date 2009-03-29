@@ -218,8 +218,10 @@ int main (int argc, char *argv[])
       exit (-1);
     }
   }
-  else
+  else {
+    printf("Usage: %s <file.sfr>\n", argv[0]);
     exit (0);
+  }
 
   if (read (fd, &title, sizeof (struct Title)) == -1)
     perror ("read");
