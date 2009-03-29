@@ -29,6 +29,8 @@
 #include <strings.h>
 #include <errno.h>
 
+#include <arpa/inet.h>
+#include <endian.h>
 #include <stdint.h>
 #include "sfr.h"
 
@@ -191,6 +193,20 @@ void print_tsp (struct Tsp *ptr)
     );
 }
 
+#define revert_l(a) { uint32_t x = htonl(a); a = x; }
+#define revert_s(a) { uint16_t x = htons(a); a = x; }
+void revert_title (struct Title *);
+void revert_offsets (struct Offsets *);
+void revert_group (struct Group *);
+void revert_gday (struct GDayStr *);
+void revert_distance (struct Distance *);
+void revert_cpoint (struct CPoint *);
+void revert_team (struct Team *);
+void revert_cday (struct CDayStr *);
+void revert_competitor (struct Competitor *);
+void revert_tsp (struct Tsp *);
+void revert_split (struct Split *);
+
 int main (int argc, char *argv[])
 {
   int fd = 0, i, j, errno;
@@ -225,8 +241,12 @@ int main (int argc, char *argv[])
 
   if (read (fd, &title, sizeof (struct Title)) == -1)
     perror ("read");
-  else
+  else {
+#if BYTE_ORDER == BIG_ENDIAN
+    revert_title (&title);
+#endif
     print_title (&title);
+  }
 
   for (i = 1; i <= title.DaysNum; i++) {
     bzero (&day, sizeof (struct DayDataSet));
@@ -241,8 +261,14 @@ int main (int argc, char *argv[])
 
   if (read (fd, &offsets, sizeof (struct Offsets)) == -1)
     perror ("read");
+#if BYTE_ORDER == BIG_ENDIAN
+  revert_offsets (&offsets);
+#endif
   if (read (fd, &sync, sizeof (int32_t)) == -1)
     perror ("read");
+#if BYTE_ORDER == BIG_ENDIAN
+  revert_l (sync);
+#endif
   printf ("sync pos: %d\n", sync);
 
   for (i = 0; i < sizeof (offsets.Groups) / sizeof (int32_t); i++)
@@ -254,14 +280,23 @@ int main (int argc, char *argv[])
       bzero (&group, sizeof (struct Group));
       if (read (fd, &group, sizeof (struct Group)) == -1)
 	perror ("read");
-      else
+      else {
+#if BYTE_ORDER == BIG_ENDIAN
+	revert_group (&group);
+#endif
 	print_group (&group);
+      }
       for (j = 0; j < title.DaysNum; j++) {
 	bzero (&gday, sizeof (struct GDayStr));
 	if (read (fd, &gday, sizeof (struct GDayStr)) == -1)
 	  perror ("read");
-	else if (gday.DistCode >= 0)
-	  print_gday (&gday);
+	else {
+#if BYTE_ORDER == BIG_ENDIAN
+	  revert_gday (&gday);
+#endif
+	  if (gday.DistCode >= 0)
+	    print_gday (&gday);
+	}
       }
     }
   for (i = 0; i < sizeof (offsets.Distances) / sizeof (int32_t); i++)
@@ -273,8 +308,12 @@ int main (int argc, char *argv[])
       bzero (&distance, sizeof (struct Distance));
       if (read (fd, &distance, sizeof (struct Distance)) == -1)
 	perror ("read");
-      else
+      else {
+#if BYTE_ORDER == BIG_ENDIAN
+	revert_distance (&distance);
+#endif
 	print_distance (&distance);
+      }
     }
   for (i = 0; i < sizeof (offsets.CPoints) / sizeof (int32_t); i++)
     if (offsets.CPoints[i] > 0) {
@@ -285,8 +324,12 @@ int main (int argc, char *argv[])
       bzero (&cpoint, sizeof (struct CPoint));
       if (read (fd, &cpoint, sizeof (struct CPoint)) == -1)
 	perror ("read");
-      else
+      else {
+#if BYTE_ORDER == BIG_ENDIAN
+	revert_cpoint (&cpoint);
+#endif
 	print_cpoint (&cpoint);
+      }
     }
   for (i = 0; i < sizeof (offsets.Teams) / sizeof (int32_t); i++)
     if (offsets.Teams[i] > 0) {
@@ -297,9 +340,12 @@ int main (int argc, char *argv[])
       bzero (&team, sizeof (struct Team));
       if (read (fd, &team, sizeof (struct Team)) == -1)
 	perror ("read");
-      else
+      else {
+#if BYTE_ORDER == BIG_ENDIAN
+	revert_team (&team);
+#endif
 	print_team (&team);
-
+      }
     }
   for (i = 0; i < sizeof (offsets.Competitors) / sizeof (int32_t); i++)
     if (offsets.Competitors[i] > 0) {
@@ -310,14 +356,22 @@ int main (int argc, char *argv[])
       bzero (&comp, sizeof (struct Competitor));
       if (read (fd, &comp, sizeof (struct Competitor)) == -1)
 	perror ("read");
-      else
+      else {
+#if BYTE_ORDER == BIG_ENDIAN
+	revert_competitor (&comp);
+#endif
 	print_competitor (&comp);
+      }
       for (j = 0; j < title.DaysNum; j++) {
 	bzero (&cday, sizeof (struct CDayStr));
 	if (read (fd, &cday, sizeof (struct CDayStr)) == -1)
 	  perror ("read");
-	else
+	else {
+#if BYTE_ORDER == BIG_ENDIAN
+	  revert_cday (&cday);
+#endif
 	  print_cday (&cday);
+	}
       }
     }
   for (i = 0; i < sizeof (offsets.Splits) / sizeof (int32_t); i++)
@@ -329,16 +383,162 @@ int main (int argc, char *argv[])
       bzero (&split, sizeof (struct Split));
       if (read (fd, &split, sizeof (struct Split)) == -1)
 	perror ("read");
-      else
+      else {
+#if BYTE_ORDER == BIG_ENDIAN
+	revert_split (&split);
+#endif
 	print_split (&split);
+      }
       for (j = 0; j < split.recs; j++) {
 	bzero (&tsp, sizeof (struct Tsp));
 	if (read (fd, &tsp, sizeof (struct Tsp)) == -1)
 	  perror ("read");
-	else if (tsp.kp > 0)
-	  print_tsp (&tsp);
+	else {
+#if BYTE_ORDER == BIG_ENDIAN
+	  revert_tsp (&tsp);
+#endif
+	  if (tsp.kp > 0)
+	    print_tsp (&tsp);
+	}
       }
     }
   close (fd);
   return 0;
+}
+
+void revert_title (struct Title *ptr)
+{
+  revert_l (ptr->Version);
+  revert_l (ptr->TitleEnd);
+  revert_l (ptr->DaysNum);
+  revert_l (ptr->GroupsNum);
+  revert_l (ptr->DistancesNum);
+  revert_l (ptr->CPNum);
+  revert_l (ptr->TeamsNum);
+  revert_l (ptr->CompetitorsNum);
+  revert_l (ptr->SplitsNum);
+  revert_l (ptr->GroupCurrentCode);
+  revert_l (ptr->DistanceCurrentCode);
+  revert_l (ptr->CPCurrentCode);
+  revert_l (ptr->TeamCurrentCode);
+  revert_l (ptr->CompetitorCurrentCode);
+  revert_l (ptr->SplitCurrentCode);
+  revert_l (ptr->CompType);
+  revert_l (ptr->CurrentDay);
+  revert_l (ptr->Precision);
+  revert_l (ptr->MidNight);
+  revert_l (ptr->CheckPunchType);
+}
+
+void revert_offsets (struct Offsets *ptr)
+{
+  int i;
+  for (i = 0; i < sizeof (ptr->Groups) / sizeof (int32_t); i++)
+    revert_l (ptr->Groups[i]);
+  for (i = 0; i < sizeof (ptr->Distances) / sizeof (int32_t); i++)
+    revert_l (ptr->Distances[i]);
+  for (i = 0; i < sizeof (ptr->CPoints) / sizeof (int32_t); i++)
+    revert_l (ptr->CPoints[i]);
+  for (i = 0; i < sizeof (ptr->Teams) / sizeof (int32_t); i++)
+    revert_l (ptr->Teams[i]);
+  for (i = 0; i < sizeof (ptr->Competitors) / sizeof (int32_t); i++)
+    revert_l (ptr->Competitors[i]);
+  for (i = 0; i < sizeof (ptr->Splits) / sizeof (int32_t); i++)
+    revert_l (ptr->Splits[i]);
+}
+
+void revert_group (struct Group *ptr)
+{
+  revert_l (ptr->Code);
+  revert_l (ptr->SBornYear);
+  revert_l (ptr->EBornYear);
+  revert_l (ptr->parent);
+  revert_l (ptr->Money);
+}
+
+void revert_gday (struct GDayStr *ptr)
+{
+  revert_l (ptr->DistCode);
+  revert_l (ptr->maxRazr);
+  revert_l (ptr->mc);
+  revert_l (ptr->kmc);
+  revert_l (ptr->checktime);
+  revert_l (ptr->MaxBals);
+}
+
+void revert_distance (struct Distance *ptr)
+{
+  int i;
+  revert_l (ptr->Code);
+  revert_l (ptr->Number);
+  revert_l (ptr->Day);
+  revert_l (ptr->MaxBall);
+  revert_l (ptr->Sequence);
+  revert_l (ptr->Height);
+  revert_l (ptr->Length);
+  revert_l (ptr->CPNum);
+  for (i = 0; i < sizeof (ptr->CP) / sizeof (int32_t); i++)
+    revert_l (ptr->CP[i]);
+  for (i = 0; i < sizeof (ptr->CPD) / sizeof (int32_t); i++)
+    revert_l (ptr->CPD[i]);
+}
+
+void revert_cpoint (struct CPoint *ptr)
+{
+  revert_l (ptr->Code);
+  revert_l (ptr->num);
+  revert_l (ptr->Station);
+  revert_l (ptr->X);
+  revert_l (ptr->Y);
+  revert_l (ptr->check);
+}
+
+void revert_team (struct Team *ptr)
+{
+  revert_l (ptr->Code);
+  revert_l (ptr->parent);
+  revert_l (ptr->Money);
+}
+
+void revert_cday (struct CDayStr *ptr)
+{
+  revert_l (ptr->Start);
+  revert_l (ptr->Finish);
+  revert_l (ptr->Bonus);
+  revert_l (ptr->Position);
+  revert_l (ptr->IsStart);
+  revert_l (ptr->Penalty);
+  revert_l (ptr->Ball);
+  revert_l (ptr->Score);
+  revert_l (ptr->dsq);
+}
+
+void revert_competitor (struct Competitor *ptr)
+{
+  revert_l (ptr->Code);
+  revert_l (ptr->StNum);
+  revert_l (ptr->GroupCode);
+  revert_l (ptr->TeamCode);
+  revert_l (ptr->Qualif);
+  revert_l (ptr->BornYear);
+  revert_l (ptr->chipNum);
+  revert_l (ptr->Money);
+  revert_l (ptr->type);
+}
+
+void revert_tsp (struct Tsp *ptr)
+{
+  revert_s (ptr->kp);
+  revert_s (ptr->check);
+  revert_l (ptr->tm);
+}
+
+void revert_split (struct Split *ptr)
+{
+  revert_l (ptr->Code);
+  revert_l (ptr->num);
+  revert_l (ptr->group);
+  revert_l (ptr->chip);
+  revert_l (ptr->day);
+  revert_l (ptr->recs);
 }
