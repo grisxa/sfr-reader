@@ -36,161 +36,9 @@
 
 extern int errno;
 
-#define finalize(a) bufferize(a, sizeof(a))
-#define BUF_SIZE 4096
-#define BUF_CHUNK 256
-char *bufferize (char *str, size_t size)
-{
-  // round buffer for non-terminated strings
-  static char buf[BUF_SIZE] = "\0\0", *ptr = buf;
-  if (size > BUF_CHUNK - 1)
-    size = BUF_CHUNK - 1;
-
-  // move cursor beyond the current string
-  ptr += strlen (ptr) + 1;
-  // if there is no place, go to beginning
-  if (ptr - buf > sizeof (buf) - size - 1)
-    ptr = buf;
-
-  // prepare buffer chunk
-  bzero (ptr, size + 1);
-  // store a string
-  strncpy (ptr, str, size);
-  return ptr;
-}
-
-char *time (int32_t stamp)
-{
-  char buf[16];
-
-  int hour = (int) (stamp / 1000 / 60 / 60);
-  int min = (int) (stamp / 1000 / 60 - hour * 60);
-  float sec = stamp / 1000 - hour * 60 * 60 - min * 60;
-
-  snprintf (buf, sizeof (buf), "%d:%02d:%02.1f", hour, min, sec);
-  return bufferize (buf, sizeof (buf));
-}
-
 void perror (const char *ptr)
 {
   printf ("%s:%d: %s: %s\n", __FILE__, __LINE__, ptr, strerror (errno));
-}
-
-
-void print_title (struct Title *ptr)
-{
-  printf ("version: %d\nheader end: %d\n"
-	  "title: %s\nreferee: %s\ngensec: %s\n"
-	  "days: %d groups: %d distances: %d\n"
-	  "cps: %d teams: %d competitors: %d\n"
-	  "splits: %d\n"
-	  "group: %d distance: %d cp: %d\n"
-	  "team: %d competitor: %d split: %d\n"
-	  "type: %d day: %d precision: %d\n"
-	  "midnight: %d check: %d\n",
-	  ptr->Version, ptr->TitleEnd,
-	  finalize (ptr->Title), finalize (ptr->Referee),
-	  finalize (ptr->GenSec), ptr->DaysNum, ptr->GroupsNum,
-	  ptr->DistancesNum, ptr->CPNum, ptr->TeamsNum, ptr->CompetitorsNum,
-	  ptr->SplitsNum, ptr->GroupCurrentCode, ptr->DistanceCurrentCode,
-	  ptr->CPCurrentCode, ptr->TeamCurrentCode,
-	  ptr->CompetitorCurrentCode, ptr->SplitCurrentCode, ptr->CompType,
-	  ptr->CurrentDay, ptr->Precision, ptr->MidNight,
-	  ptr->CheckPunchType);
-}
-
-void print_day (struct DayDataSet *ptr, int num)
-{
-  printf ("day: %d\nname: %s\ndate: %s\n",
-	  num, finalize (ptr->DayName), finalize (ptr->DayDate));
-}
-
-void print_group (struct Group *ptr)
-{
-  printf ("group: %d, parent: %d\n"
-	  "name: %s\n"
-	  "start: %d, end: %d\n"
-	  "money: %d\n",
-	  ptr->Code, ptr->parent, finalize (ptr->Name),
-	  ptr->SBornYear, ptr->EBornYear, ptr->Money);
-}
-
-void print_gday (struct GDayStr *ptr)
-{
-  printf ("distcode: %d max.razr: %d mc: %d kmc: %d "
-	  "checktime: %d max.bals: %d\n",
-	  ptr->DistCode, ptr->maxRazr, ptr->mc, ptr->kmc,
-	  ptr->checktime, ptr->MaxBals);
-}
-
-void print_distance (struct Distance *ptr)
-{
-  int i;
-  printf ("distance: %d\nname: %s\n"
-	  "number: %d, day: %d, max.ball: %d\n"
-	  "sequence: %d, length: %d, height: %d\n"
-	  "cp num: %d\n",
-	  ptr->Code, finalize (ptr->Name),
-	  ptr->Number, ptr->Day, ptr->MaxBall,
-	  ptr->Sequence, ptr->Length, ptr->Height, ptr->CPNum);
-  for (i = 0; i < ptr->CPNum; i++)
-    printf ("%4d  ", ptr->CP[i]);
-  putchar ('\n');
-  for (i = 0; i < ptr->CPNum; i++)
-    printf ("%4dm ", ptr->CPD[i]);
-  putchar ('\n');
-}
-
-void print_cpoint (struct CPoint *ptr)
-{
-  printf ("cpoint: %d, number: %d, station: %d\n"
-	  "x: %d, y: %d, check: %d\n",
-	  ptr->Code, ptr->num, ptr->Station, ptr->X, ptr->Y, ptr->check);
-}
-
-void print_team (struct Team *ptr)
-{
-  printf ("team: %d, parent: %d\n"
-	  "name: %s\n"
-	  "coach: %s, contacts: %s\n"
-	  "entry: %s, payment: %s\n"
-	  "money: %d\n",
-	  ptr->Code, ptr->parent, finalize (ptr->Name),
-	  finalize (ptr->Coach), finalize (ptr->Contacts),
-	  finalize (ptr->EntryDate), finalize (ptr->PaymentDate), ptr->Money);
-}
-
-void print_competitor (struct Competitor *ptr)
-{
-  printf ("competitor: %d, number: %d\n"
-	  "surname: %s, name: %s\n"
-	  "group: %d, team: %d, qualif: %d, year: %d\n"
-	  "comment: %s\n"
-	  "chip: %d, money: %d, type: %d\n",
-	  ptr->Code, ptr->StNum, finalize (ptr->Family), finalize (ptr->Name),
-	  ptr->GroupCode, ptr->TeamCode, ptr->Qualif, ptr->BornYear,
-	  finalize (ptr->Comment), ptr->chipNum, ptr->Money, ptr->type);
-}
-
-void print_cday (struct CDayStr *ptr)
-{
-  printf ("start: %s, finish: %s, bonus: %d, position: %d\n"
-	  "started: %d, penalty: %d, ball: %d, score: %d, dsq: %d\n",
-	  time (ptr->Start), time (ptr->Finish), ptr->Bonus, ptr->Position,
-	  ptr->IsStart, ptr->Penalty, ptr->Ball, ptr->Score, ptr->dsq);
-}
-
-void print_split (struct Split *ptr)
-{
-  printf ("split: %d\n"
-	  "number: %d, group: %d, chip: %d, day: %d, recs: %d\n",
-	  ptr->Code, ptr->num, ptr->group, ptr->chip, ptr->day, ptr->recs);
-}
-
-void print_tsp (struct Tsp *ptr)
-{
-  printf ("kp: %d, check: %d, time: %s\n", ptr->kp, ptr->check, time (ptr->tm)
-    );
 }
 
 #define revert_l(a) { uint32_t x = htonl(a); a = x; }
@@ -206,6 +54,21 @@ void revert_cday (struct CDayStr *);
 void revert_competitor (struct Competitor *);
 void revert_tsp (struct Tsp *);
 void revert_split (struct Split *);
+
+#define finalize(a) bufferize(a, sizeof(a))
+char *bufferize (char *, size_t);
+char *time (int32_t);
+void print_title (struct Title *);
+void print_day (struct DayDataSet *, int num);
+void print_group (struct Group *);
+void print_gday (struct GDayStr *);
+void print_distance (struct Distance *);
+void print_cpoint (struct CPoint *);
+void print_team (struct Team *);
+void print_competitor (struct Competitor *);
+void print_cday (struct CDayStr *);
+void print_split (struct Split *);
+void print_tsp (struct Tsp *);
 
 int main (int argc, char *argv[])
 {
@@ -542,3 +405,154 @@ void revert_split (struct Split *ptr)
   revert_l (ptr->day);
   revert_l (ptr->recs);
 }
+
+#define BUF_SIZE 4096
+#define BUF_CHUNK 256
+char *bufferize (char *str, size_t size)
+{
+  // round buffer for non-terminated strings
+  static char buf[BUF_SIZE] = "\0\0", *ptr = buf;
+  if (size > BUF_CHUNK - 1)
+    size = BUF_CHUNK - 1;
+
+  // move cursor beyond the current string
+  ptr += strlen (ptr) + 1;
+  // if there is no place, go to beginning
+  if (ptr - buf > sizeof (buf) - size - 1)
+    ptr = buf;
+
+  // prepare buffer chunk
+  bzero (ptr, size + 1);
+  // store a string
+  strncpy (ptr, str, size);
+  return ptr;
+}
+
+char *time (int32_t stamp)
+{
+  char buf[16];
+
+  int hour = (int) (stamp / 1000 / 60 / 60);
+  int min = (int) (stamp / 1000 / 60 - hour * 60);
+  float sec = stamp / 1000 - hour * 60 * 60 - min * 60;
+
+  snprintf (buf, sizeof (buf), "%d:%02d:%02.1f", hour, min, sec);
+  return bufferize (buf, sizeof (buf));
+}
+
+void print_title (struct Title *ptr)
+{
+  printf ("version: %d\nheader end: %d\n"
+	  "title: %s\nreferee: %s\ngensec: %s\n"
+	  "days: %d groups: %d distances: %d\n"
+	  "cps: %d teams: %d competitors: %d\n"
+	  "splits: %d\n"
+	  "group: %d distance: %d cp: %d\n"
+	  "team: %d competitor: %d split: %d\n"
+	  "type: %d day: %d precision: %d\n"
+	  "midnight: %d check: %d\n",
+	  ptr->Version, ptr->TitleEnd,
+	  finalize (ptr->Title), finalize (ptr->Referee),
+	  finalize (ptr->GenSec), ptr->DaysNum, ptr->GroupsNum,
+	  ptr->DistancesNum, ptr->CPNum, ptr->TeamsNum, ptr->CompetitorsNum,
+	  ptr->SplitsNum, ptr->GroupCurrentCode, ptr->DistanceCurrentCode,
+	  ptr->CPCurrentCode, ptr->TeamCurrentCode,
+	  ptr->CompetitorCurrentCode, ptr->SplitCurrentCode, ptr->CompType,
+	  ptr->CurrentDay, ptr->Precision, ptr->MidNight,
+	  ptr->CheckPunchType);
+}
+
+void print_day (struct DayDataSet *ptr, int num)
+{
+  printf ("day: %d\nname: %s\ndate: %s\n",
+	  num, finalize (ptr->DayName), finalize (ptr->DayDate));
+}
+
+void print_group (struct Group *ptr)
+{
+  printf ("group: %d, parent: %d\n"
+	  "name: %s\n"
+	  "start: %d, end: %d\n"
+	  "money: %d\n",
+	  ptr->Code, ptr->parent, finalize (ptr->Name),
+	  ptr->SBornYear, ptr->EBornYear, ptr->Money);
+}
+
+void print_gday (struct GDayStr *ptr)
+{
+  printf ("distcode: %d max.razr: %d mc: %d kmc: %d "
+	  "checktime: %d max.bals: %d\n",
+	  ptr->DistCode, ptr->maxRazr, ptr->mc, ptr->kmc,
+	  ptr->checktime, ptr->MaxBals);
+}
+
+void print_distance (struct Distance *ptr)
+{
+  int i;
+  printf ("distance: %d\nname: %s\n"
+	  "number: %d, day: %d, max.ball: %d\n"
+	  "sequence: %d, length: %d, height: %d\n"
+	  "cp num: %d\n",
+	  ptr->Code, finalize (ptr->Name),
+	  ptr->Number, ptr->Day, ptr->MaxBall,
+	  ptr->Sequence, ptr->Length, ptr->Height, ptr->CPNum);
+  for (i = 0; i < ptr->CPNum; i++)
+    printf ("%4d  ", ptr->CP[i]);
+  putchar ('\n');
+  for (i = 0; i < ptr->CPNum; i++)
+    printf ("%4dm ", ptr->CPD[i]);
+  putchar ('\n');
+}
+
+void print_cpoint (struct CPoint *ptr)
+{
+  printf ("cpoint: %d, number: %d, station: %d\n"
+	  "x: %d, y: %d, check: %d\n",
+	  ptr->Code, ptr->num, ptr->Station, ptr->X, ptr->Y, ptr->check);
+}
+
+void print_team (struct Team *ptr)
+{
+  printf ("team: %d, parent: %d\n"
+	  "name: %s\n"
+	  "coach: %s, contacts: %s\n"
+	  "entry: %s, payment: %s\n"
+	  "money: %d\n",
+	  ptr->Code, ptr->parent, finalize (ptr->Name),
+	  finalize (ptr->Coach), finalize (ptr->Contacts),
+	  finalize (ptr->EntryDate), finalize (ptr->PaymentDate), ptr->Money);
+}
+
+void print_competitor (struct Competitor *ptr)
+{
+  printf ("competitor: %d, number: %d\n"
+	  "surname: %s, name: %s\n"
+	  "group: %d, team: %d, qualif: %d, year: %d\n"
+	  "comment: %s\n"
+	  "chip: %d, money: %d, type: %d\n",
+	  ptr->Code, ptr->StNum, finalize (ptr->Family), finalize (ptr->Name),
+	  ptr->GroupCode, ptr->TeamCode, ptr->Qualif, ptr->BornYear,
+	  finalize (ptr->Comment), ptr->chipNum, ptr->Money, ptr->type);
+}
+
+void print_cday (struct CDayStr *ptr)
+{
+  printf ("start: %s, finish: %s, bonus: %d, position: %d\n"
+	  "started: %d, penalty: %d, ball: %d, score: %d, dsq: %d\n",
+	  time (ptr->Start), time (ptr->Finish), ptr->Bonus, ptr->Position,
+	  ptr->IsStart, ptr->Penalty, ptr->Ball, ptr->Score, ptr->dsq);
+}
+
+void print_split (struct Split *ptr)
+{
+  printf ("split: %d\n"
+	  "number: %d, group: %d, chip: %d, day: %d, recs: %d\n",
+	  ptr->Code, ptr->num, ptr->group, ptr->chip, ptr->day, ptr->recs);
+}
+
+void print_tsp (struct Tsp *ptr)
+{
+  printf ("kp: %d, check: %d, time: %s\n", ptr->kp, ptr->check, time (ptr->tm)
+    );
+}
+
