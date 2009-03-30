@@ -40,6 +40,16 @@ void perror (const char *ptr)
   printf ("%s:%d: %s: %s\n", __FILE__, __LINE__, ptr, strerror (errno));
 }
 
+#ifndef le32toh
+#include <asm/byteorder.h>
+#define le32toh(a) __le32_to_cpu(a)
+#endif
+
+#ifndef le16toh
+#include <asm/byteorder.h>
+#define le16toh(a) __le16_to_cpu(a)
+#endif
+
 #define revert_l(a) { uint32_t x = le32toh(a); a = x; }
 #define revert_s(a) { uint16_t x = le16toh(a); a = x; }
 void revert_title (struct Title *);
