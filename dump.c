@@ -29,7 +29,6 @@
 #include <strings.h>
 #include <errno.h>
 
-#include <arpa/inet.h>
 #include <endian.h>
 #include <stdint.h>
 #include "sfr.h"
@@ -41,8 +40,8 @@ void perror (const char *ptr)
   printf ("%s:%d: %s: %s\n", __FILE__, __LINE__, ptr, strerror (errno));
 }
 
-#define revert_l(a) { uint32_t x = htonl(a); a = x; }
-#define revert_s(a) { uint16_t x = htons(a); a = x; }
+#define revert_l(a) { uint32_t x = le32toh(a); a = x; }
+#define revert_s(a) { uint16_t x = le16toh(a); a = x; }
 void revert_title (struct Title *);
 void revert_offsets (struct Offsets *);
 void revert_group (struct Group *);
