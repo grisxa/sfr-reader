@@ -28,10 +28,11 @@
 #include <string.h>
 #include <strings.h>
 #include <errno.h>
-
-#include <endian.h>
 #include <stdint.h>
+
 #include "sfr.h"
+#include "misc.h"
+#include "revert.h"
 
 extern int errno;
 
@@ -40,33 +41,6 @@ void perror (const char *ptr)
   printf ("%s:%d: %s: %s\n", __FILE__, __LINE__, ptr, strerror (errno));
 }
 
-#ifndef le32toh
-#include <asm/byteorder.h>
-#define le32toh(a) __le32_to_cpu(a)
-#endif
-
-#ifndef le16toh
-#include <asm/byteorder.h>
-#define le16toh(a) __le16_to_cpu(a)
-#endif
-
-#define revert_l(a) { uint32_t x = le32toh(a); a = x; }
-#define revert_s(a) { uint16_t x = le16toh(a); a = x; }
-void revert_title (struct Title *);
-void revert_offsets (struct Offsets *);
-void revert_group (struct Group *);
-void revert_gday (struct GDayStr *);
-void revert_distance (struct Distance *);
-void revert_cpoint (struct CPoint *);
-void revert_team (struct Team *);
-void revert_cday (struct CDayStr *);
-void revert_competitor (struct Competitor *);
-void revert_tsp (struct Tsp *);
-void revert_split (struct Split *);
-
-#define finalize(a) bufferize(a, sizeof(a))
-char *bufferize (char *, size_t);
-char *time (int32_t);
 void print_title (struct Title *);
 void print_day (struct DayDataSet *, int num);
 void print_group (struct Group *);
@@ -107,7 +81,7 @@ int main (int argc, char *argv[])
     }
   }
   else {
-    printf("Usage: %s <file.sfr>\n", argv[0]);
+    printf ("Usage: %s <file.sfr>\n", argv[0]);
     exit (0);
   }
 
@@ -133,6 +107,7 @@ int main (int argc, char *argv[])
 
   if (read (fd, &offsets, sizeof (struct Offsets)) == -1)
     perror ("read");
+
 #if BYTE_ORDER == BIG_ENDIAN
   revert_offsets (&offsets);
 #endif
@@ -278,177 +253,6 @@ int main (int argc, char *argv[])
   return 0;
 }
 
-void revert_title (struct Title *ptr)
-{
-  revert_l (ptr->Version);
-  revert_l (ptr->TitleEnd);
-  revert_l (ptr->DaysNum);
-  revert_l (ptr->GroupsNum);
-  revert_l (ptr->DistancesNum);
-  revert_l (ptr->CPNum);
-  revert_l (ptr->TeamsNum);
-  revert_l (ptr->CompetitorsNum);
-  revert_l (ptr->SplitsNum);
-  revert_l (ptr->GroupCurrentCode);
-  revert_l (ptr->DistanceCurrentCode);
-  revert_l (ptr->CPCurrentCode);
-  revert_l (ptr->TeamCurrentCode);
-  revert_l (ptr->CompetitorCurrentCode);
-  revert_l (ptr->SplitCurrentCode);
-  revert_l (ptr->CompType);
-  revert_l (ptr->CurrentDay);
-  revert_l (ptr->Precision);
-  revert_l (ptr->MidNight);
-  revert_l (ptr->CheckPunchType);
-}
-
-void revert_offsets (struct Offsets *ptr)
-{
-  int i;
-  for (i = 0; i < sizeof (ptr->Groups) / sizeof (int32_t); i++)
-    revert_l (ptr->Groups[i]);
-  for (i = 0; i < sizeof (ptr->Distances) / sizeof (int32_t); i++)
-    revert_l (ptr->Distances[i]);
-  for (i = 0; i < sizeof (ptr->CPoints) / sizeof (int32_t); i++)
-    revert_l (ptr->CPoints[i]);
-  for (i = 0; i < sizeof (ptr->Teams) / sizeof (int32_t); i++)
-    revert_l (ptr->Teams[i]);
-  for (i = 0; i < sizeof (ptr->Competitors) / sizeof (int32_t); i++)
-    revert_l (ptr->Competitors[i]);
-  for (i = 0; i < sizeof (ptr->Splits) / sizeof (int32_t); i++)
-    revert_l (ptr->Splits[i]);
-}
-
-void revert_group (struct Group *ptr)
-{
-  revert_l (ptr->Code);
-  revert_l (ptr->SBornYear);
-  revert_l (ptr->EBornYear);
-  revert_l (ptr->parent);
-  revert_l (ptr->Money);
-}
-
-void revert_gday (struct GDayStr *ptr)
-{
-  revert_l (ptr->DistCode);
-  revert_l (ptr->maxRazr);
-  revert_l (ptr->mc);
-  revert_l (ptr->kmc);
-  revert_l (ptr->checktime);
-  revert_l (ptr->MaxBals);
-}
-
-void revert_distance (struct Distance *ptr)
-{
-  int i;
-  revert_l (ptr->Code);
-  revert_l (ptr->Number);
-  revert_l (ptr->Day);
-  revert_l (ptr->MaxBall);
-  revert_l (ptr->Sequence);
-  revert_l (ptr->Height);
-  revert_l (ptr->Length);
-  revert_l (ptr->CPNum);
-  for (i = 0; i < sizeof (ptr->CP) / sizeof (int32_t); i++)
-    revert_l (ptr->CP[i]);
-  for (i = 0; i < sizeof (ptr->CPD) / sizeof (int32_t); i++)
-    revert_l (ptr->CPD[i]);
-}
-
-void revert_cpoint (struct CPoint *ptr)
-{
-  revert_l (ptr->Code);
-  revert_l (ptr->num);
-  revert_l (ptr->Station);
-  revert_l (ptr->X);
-  revert_l (ptr->Y);
-  revert_l (ptr->check);
-}
-
-void revert_team (struct Team *ptr)
-{
-  revert_l (ptr->Code);
-  revert_l (ptr->parent);
-  revert_l (ptr->Money);
-}
-
-void revert_cday (struct CDayStr *ptr)
-{
-  revert_l (ptr->Start);
-  revert_l (ptr->Finish);
-  revert_l (ptr->Bonus);
-  revert_l (ptr->Position);
-  revert_l (ptr->IsStart);
-  revert_l (ptr->Penalty);
-  revert_l (ptr->Ball);
-  revert_l (ptr->Score);
-  revert_l (ptr->dsq);
-}
-
-void revert_competitor (struct Competitor *ptr)
-{
-  revert_l (ptr->Code);
-  revert_l (ptr->StNum);
-  revert_l (ptr->GroupCode);
-  revert_l (ptr->TeamCode);
-  revert_l (ptr->Qualif);
-  revert_l (ptr->BornYear);
-  revert_l (ptr->chipNum);
-  revert_l (ptr->Money);
-  revert_l (ptr->type);
-}
-
-void revert_tsp (struct Tsp *ptr)
-{
-  revert_s (ptr->kp);
-  revert_s (ptr->check);
-  revert_l (ptr->tm);
-}
-
-void revert_split (struct Split *ptr)
-{
-  revert_l (ptr->Code);
-  revert_l (ptr->num);
-  revert_l (ptr->group);
-  revert_l (ptr->chip);
-  revert_l (ptr->day);
-  revert_l (ptr->recs);
-}
-
-#define BUF_SIZE 4096
-#define BUF_CHUNK 256
-char *bufferize (char *str, size_t size)
-{
-  // round buffer for non-terminated strings
-  static char buf[BUF_SIZE] = "\0\0", *ptr = buf;
-  if (size > BUF_CHUNK - 1)
-    size = BUF_CHUNK - 1;
-
-  // move cursor beyond the current string
-  ptr += strlen (ptr) + 1;
-  // if there is no place, go to beginning
-  if (ptr - buf > sizeof (buf) - size - 1)
-    ptr = buf;
-
-  // prepare buffer chunk
-  bzero (ptr, size + 1);
-  // store a string
-  strncpy (ptr, str, size);
-  return ptr;
-}
-
-char *time (int32_t stamp)
-{
-  char buf[16];
-
-  int hour = (int) (stamp / 1000 / 60 / 60);
-  int min = (int) (stamp / 1000 / 60 - hour * 60);
-  float sec = stamp / 1000 - hour * 60 * 60 - min * 60;
-
-  snprintf (buf, sizeof (buf), "%d:%02d:%02.1f", hour, min, sec);
-  return bufferize (buf, sizeof (buf));
-}
-
 void print_title (struct Title *ptr)
 {
   printf ("version: %d\nheader end: %d\n"
@@ -564,4 +368,3 @@ void print_tsp (struct Tsp *ptr)
   printf ("kp: %d, check: %d, time: %s\n", ptr->kp, ptr->check, time (ptr->tm)
     );
 }
-
