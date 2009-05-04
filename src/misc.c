@@ -25,7 +25,7 @@ char *bufferize (char *str, size_t size)
   return ptr;
 }
 
-char *time (int32_t stamp)
+char *totime (int32_t stamp)
 {
   char buf[16];
 

@@ -352,7 +352,7 @@ void print_cday (struct CDayStr *ptr)
 {
   printf ("start: %s, finish: %s, bonus: %d, position: %d\n"
 	  "started: %d, penalty: %d, ball: %d, score: %d, dsq: %d\n",
-	  time (ptr->Start), time (ptr->Finish), ptr->Bonus, ptr->Position,
+	  totime (ptr->Start), totime (ptr->Finish), ptr->Bonus, ptr->Position,
 	  ptr->IsStart, ptr->Penalty, ptr->Ball, ptr->Score, ptr->dsq);
 }
 
@@ -365,6 +365,6 @@ void print_split (struct Split *ptr)
 
 void print_tsp (struct Tsp *ptr)
 {
-  printf ("kp: %d, check: %d, time: %s\n", ptr->kp, ptr->check, time (ptr->tm)
+  printf ("kp: %d, check: %d, time: %s\n", ptr->kp, ptr->check, totime (ptr->tm)
     );
 }

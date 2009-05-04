@@ -531,7 +531,7 @@ int main (int argc, char *argv[])
 	  if (csplits[j].tsp[n].check > 0
 	      || (csplits[j].tsp[n].check == 0 && n > 0)) {
 	    printf (" %s",
-		    time (csplits[j].tsp[n].tm - start));
+		    totime (csplits[j].tsp[n].tm - start));
 	  }
 
 	puts ("");
@@ -540,7 +540,7 @@ int main (int argc, char *argv[])
 	  if (csplits[j].tsp[n].check > 0
 	      || (csplits[j].tsp[n].check == 0 && n > 0)) {
 	    printf (" %s",
-		    time (csplits[j].tsp[n].tm - last));
+		    totime (csplits[j].tsp[n].tm - last));
 	    last = csplits[j].tsp[n].tm;
 	  }
 	puts ("");
@@ -552,7 +552,7 @@ int main (int argc, char *argv[])
 	      && (csplits[j].tsp[n].check > 0
 		  || (csplits[j].tsp[n].check == 0 && n > 0))) {
 	    printf (" %s",
-		    time ((csplits[j].tsp[n].tm -
+		    totime ((csplits[j].tsp[n].tm -
 			   last) * 1000 / csplits[j].dist->CPD[n - 1]));
 	    last = csplits[j].tsp[n].tm;
 	  }
