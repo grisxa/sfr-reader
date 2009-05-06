@@ -52,8 +52,13 @@
 #  endif
 #endif
 
-#define revert_l(a) { uint32_t x = le32toh(a); a = x; }
-#define revert_s(a) { uint16_t x = le16toh(a); a = x; }
+#if BYTE_ORDER == BIG_ENDIAN
+#  define revert_l(a) { uint32_t x = le32toh(a); a = x; }
+#  define revert_s(a) { uint16_t x = le16toh(a); a = x; }
+#else
+# define revert_l(a) (a)
+# define revert_s(a) (a)
+#endif
 void revert_title (struct Title *);
 void revert_offsets (struct Offsets *);
 void revert_group (struct Group *);

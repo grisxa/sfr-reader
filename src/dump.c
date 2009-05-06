@@ -88,9 +88,7 @@ int main (int argc, char *argv[])
   if (read (fd, &title, sizeof (struct Title)) == -1)
     perror ("read");
   else {
-#if BYTE_ORDER == BIG_ENDIAN
     revert_title (&title);
-#endif
     print_title (&title);
   }
 
@@ -108,14 +106,10 @@ int main (int argc, char *argv[])
   if (read (fd, &offsets, sizeof (struct Offsets)) == -1)
     perror ("read");
 
-#if BYTE_ORDER == BIG_ENDIAN
   revert_offsets (&offsets);
-#endif
   if (read (fd, &sync, sizeof (int32_t)) == -1)
     perror ("read");
-#if BYTE_ORDER == BIG_ENDIAN
   revert_l (sync);
-#endif
   printf ("sync pos: %d\n", sync);
 
   for (i = 0; i < sizeof (offsets.Groups) / sizeof (int32_t); i++)
@@ -128,9 +122,7 @@ int main (int argc, char *argv[])
       if (read (fd, &group, sizeof (struct Group)) == -1)
 	perror ("read");
       else {
-#if BYTE_ORDER == BIG_ENDIAN
 	revert_group (&group);
-#endif
 	print_group (&group);
       }
       for (j = 0; j < title.DaysNum; j++) {
@@ -138,9 +130,7 @@ int main (int argc, char *argv[])
 	if (read (fd, &gday, sizeof (struct GDayStr)) == -1)
 	  perror ("read");
 	else {
-#if BYTE_ORDER == BIG_ENDIAN
 	  revert_gday (&gday);
-#endif
 	  if (gday.DistCode >= 0)
 	    print_gday (&gday);
 	}
@@ -156,9 +146,7 @@ int main (int argc, char *argv[])
       if (read (fd, &distance, sizeof (struct Distance)) == -1)
 	perror ("read");
       else {
-#if BYTE_ORDER == BIG_ENDIAN
 	revert_distance (&distance);
-#endif
 	print_distance (&distance);
       }
     }
@@ -172,9 +160,7 @@ int main (int argc, char *argv[])
       if (read (fd, &cpoint, sizeof (struct CPoint)) == -1)
 	perror ("read");
       else {
-#if BYTE_ORDER == BIG_ENDIAN
 	revert_cpoint (&cpoint);
-#endif
 	print_cpoint (&cpoint);
       }
     }
@@ -188,9 +174,7 @@ int main (int argc, char *argv[])
       if (read (fd, &team, sizeof (struct Team)) == -1)
 	perror ("read");
       else {
-#if BYTE_ORDER == BIG_ENDIAN
 	revert_team (&team);
-#endif
 	print_team (&team);
       }
     }
@@ -204,9 +188,7 @@ int main (int argc, char *argv[])
       if (read (fd, &comp, sizeof (struct Competitor)) == -1)
 	perror ("read");
       else {
-#if BYTE_ORDER == BIG_ENDIAN
 	revert_competitor (&comp);
-#endif
 	print_competitor (&comp);
       }
       for (j = 0; j < title.DaysNum; j++) {
@@ -214,9 +196,7 @@ int main (int argc, char *argv[])
 	if (read (fd, &cday, sizeof (struct CDayStr)) == -1)
 	  perror ("read");
 	else {
-#if BYTE_ORDER == BIG_ENDIAN
 	  revert_cday (&cday);
-#endif
 	  print_cday (&cday);
 	}
       }
@@ -231,9 +211,7 @@ int main (int argc, char *argv[])
       if (read (fd, &split, sizeof (struct Split)) == -1)
 	perror ("read");
       else {
-#if BYTE_ORDER == BIG_ENDIAN
 	revert_split (&split);
-#endif
 	print_split (&split);
       }
       for (j = 0; j < split.recs; j++) {
@@ -241,9 +219,7 @@ int main (int argc, char *argv[])
 	if (read (fd, &tsp, sizeof (struct Tsp)) == -1)
 	  perror ("read");
 	else {
-#if BYTE_ORDER == BIG_ENDIAN
 	  revert_tsp (&tsp);
-#endif
 	  if (tsp.kp > 0)
 	    print_tsp (&tsp);
 	}
