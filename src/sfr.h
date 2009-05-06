@@ -23,6 +23,8 @@
 #ifndef SFR_H
 #define SFR_H
 
+#include <stdint.h>
+
 struct Title {
   int32_t Version;		//Версия файла
   int32_t TitleEnd;		//Конец заголовка

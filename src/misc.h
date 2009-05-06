@@ -1,4 +1,5 @@
 #include <sys/types.h>
+#include <stdint.h>
 
 #define finalize(a) bufferize(a, sizeof(a))
 char *bufferize (char *, size_t);
