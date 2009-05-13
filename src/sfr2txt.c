@@ -540,53 +540,39 @@ int main (int argc, char *argv[])
 	      finalize (csplits[j].comp->comp.Family),
 	      finalize (csplits[j].comp->comp.Name),
 	      finalize (csplits[j].team->Name));
-/*,
-	      csplits[j].comp->comp.BornYear,
-	      qualification[csplits[j].comp->comp.Qualif],
-	      csplits[j].cday->dsq ? "снят" : time (csplits[j].cday->
-							Finish -
-							csplits[j].cday->
-							Start));
-*/
 
-//      if (!csplits[j].cday->dsq) {
 	start = last = csplits[j].cday->Start;
-	printf ("lap: ");	//%d recs\n", csplits[j].split->split.recs);
+	printf ("lap: ");
 	for (n = 0; n < csplits[j].split->split.recs && n < CHIP_RECS; n++)
-	  if (csplits[j].tsp[n].check > 0
-	      || (csplits[j].tsp[n].check == 0 && n > 0)) {
+	  if (csplits[j].tsp[n].check > 0 || csplits[j].tsp[n].tm == csplits[j].cday->Finish)
 	    printf (" %s",
 		    totime (csplits[j].tsp[n].tm - start));
-	  }
 
 	puts ("");
 	printf ("split: ");
 	for (n = 0; n < csplits[j].split->split.recs && n < CHIP_RECS; n++)
-	  if (csplits[j].tsp[n].check > 0
-	      || (csplits[j].tsp[n].check == 0 && n > 0)) {
+	  if (csplits[j].tsp[n].check > 0 || csplits[j].tsp[n].tm == csplits[j].cday->Finish) {
 	    printf (" %s",
 		    totime (csplits[j].tsp[n].tm - last));
 	    last = csplits[j].tsp[n].tm;
 	  }
+
 	puts ("");
 	printf ("speed: ");
 	last = csplits[j].cday->Start;
 
 	for (n = 0; n < csplits[j].split->split.recs && n < CHIP_RECS; n++)
 	  if (csplits[j].dist->CPD[n - 1] > 0
-	      && (csplits[j].tsp[n].check > 0
-		  || (csplits[j].tsp[n].check == 0 && n > 0))) {
+	      && (csplits[j].tsp[n].check > 0 || csplits[j].tsp[n].tm == csplits[j].cday->Finish)) {
 	    printf (" %s",
 		    totime ((csplits[j].tsp[n].tm -
 			   last) * 1000 / csplits[j].dist->CPD[n - 1]));
 	    last = csplits[j].tsp[n].tm;
 	  }
-
 	puts ("");
 
 
       }
-//      puts ("");
     }
     free (csplits);
   }
