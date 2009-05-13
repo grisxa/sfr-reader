@@ -86,6 +86,25 @@ int comp_num_cmp (const void *a, const void *b)
   return ((struct Comps *) a)->comp.StNum > ((struct Comps *) b)->comp.StNum;
 }
 
+int split_comp_cmp (const void *a, const void *b)
+{
+    struct Split *aa = &((struct Splits *) a)->split;
+    struct Split *bb = &((struct Splits *) b)->split;
+
+    if (aa->day < bb->day)
+	return -1;
+    if (aa->day > bb->day)
+	return 1;
+    if (aa->group < bb->group)
+	return -1;
+    if (aa->group > bb->group)
+	return 1;
+    if (aa->num < bb->num)
+	return -1;
+    if (aa->num > bb->num)
+	return 1;
+    return 0;
+}
 
 int csplit_cmp (const void *a, const void *b)
 {
@@ -441,11 +460,15 @@ int main (int argc, char *argv[])
 
       if ((ptr =
 	   bsearch (splits + k, splits, k, sizeof (struct Splits),
-		    split_cmp)) != NULL)
+		    split_comp_cmp)) != NULL) {
+	int tsp = ((struct Splits *)ptr)->tsp_offset;
+	splits[k].tsp_offset = tsp;
+	memcpy (tsps + tsp * CHIP_RECS, tsps + k * CHIP_RECS, sizeof (struct Tsp) * CHIP_RECS);
 	memcpy (ptr, splits + k, sizeof (struct Splits));
+      }
       else {
 	k++;
-	qsort (splits, k, sizeof (struct Splits), split_cmp);
+	qsort (splits, k, sizeof (struct Splits), split_comp_cmp);
       }
     }
   split_num = k;
@@ -473,8 +496,9 @@ int main (int argc, char *argv[])
 
 
     for (j = k = 0; j < split_num; j++) {
-      if (splits[j].split.group == dist.Code &&
-	  splits[j].split.day == day + 1) {
+      if (splits[j].split.group != dist.Code ||
+	  splits[j].split.day != day + 1)
+	    continue;
 
 	if ((ptr =
 	     realloc (csplits, sizeof (struct CSplit) * (k + 1))) == NULL) {
@@ -488,21 +512,22 @@ int main (int argc, char *argv[])
 	comp.comp.StNum = splits[j].split.num;
 	if ((cptr =
 	     bsearch (&comp, comps, comp_num, sizeof (struct Comps),
-		      comp_num_cmp)) != NULL
-	    && cptr->comp.GroupCode == groups[i].group.Code) {
+		      comp_num_cmp)) == NULL
+	    || cptr->comp.GroupCode != groups[i].group.Code)
+		continue;
+
 	  team.Code = cptr->comp.TeamCode;
 	  if ((tptr = bsearch (&team, teams, team_num, sizeof (struct Team),
-			       team_cmp)) != NULL) {
+			       team_cmp)) == NULL)
+	    continue;
+
 	    csplits[k].comp = cptr;
 	    csplits[k].team = tptr;
 	    csplits[k].split = splits + j;
-	    csplits[k].tsp = tsps + j * CHIP_RECS;
+	    csplits[k].tsp = tsps + splits[j].tsp_offset * CHIP_RECS;
 	    csplits[k].dist = dptr;
 	    csplits[k].cday = cdays + cptr->day_offset * title->DaysNum + day;
 	    k++;
-	  }
-	}
-      }
     }
     qsort (csplits, k, sizeof (struct CSplit), csplit_cmp);
     for (j = 0; j < k; j++) {
