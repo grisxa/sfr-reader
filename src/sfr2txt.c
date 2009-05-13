@@ -546,14 +546,14 @@ int main (int argc, char *argv[])
 	for (n = 0; n < csplits[j].split->split.recs && n < CHIP_RECS; n++)
 	  if (csplits[j].tsp[n].check > 0 || csplits[j].tsp[n].tm == csplits[j].cday->Finish)
 	    printf (" %s",
-		    totime (csplits[j].tsp[n].tm - start));
+		    minutes (csplits[j].tsp[n].tm - start));
 
 	puts ("");
 	printf ("split: ");
 	for (n = 0; n < csplits[j].split->split.recs && n < CHIP_RECS; n++)
 	  if (csplits[j].tsp[n].check > 0 || csplits[j].tsp[n].tm == csplits[j].cday->Finish) {
 	    printf (" %s",
-		    totime (csplits[j].tsp[n].tm - last));
+		    minutes (csplits[j].tsp[n].tm - last));
 	    last = csplits[j].tsp[n].tm;
 	  }
 
@@ -565,7 +565,7 @@ int main (int argc, char *argv[])
 	  if (csplits[j].dist->CPD[n - 1] > 0
 	      && (csplits[j].tsp[n].check > 0 || csplits[j].tsp[n].tm == csplits[j].cday->Finish)) {
 	    printf (" %s",
-		    totime ((csplits[j].tsp[n].tm -
+		    minutes ((csplits[j].tsp[n].tm -
 			   last) * 1000 / csplits[j].dist->CPD[n - 1]));
 	    last = csplits[j].tsp[n].tm;
 	  }
