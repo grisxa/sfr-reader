@@ -35,6 +35,7 @@
 #include "sfr.h"
 #include "misc.h"
 #include "sfr2txt.h"
+#include "revert.h"
 
 extern int errno;
 
