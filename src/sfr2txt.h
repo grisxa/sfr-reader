@@ -21,6 +21,3 @@ struct CSplit {
 };
 #define CHIP_RECS 64
 
-#if !HAVE_BZERO && HAVE_MEMSET
-# define bzero(buf, bytes)      ((void) memset (buf, 0, bytes))
-#endif
