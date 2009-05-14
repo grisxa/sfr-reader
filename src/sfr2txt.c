@@ -474,6 +474,7 @@ int main (int argc, char *argv[])
     }
   split_num = k;
 
+  close (fd);
 
 //////////
   qsort (comps, comp_num, sizeof (struct Comps), comp_num_cmp);
@@ -577,8 +578,6 @@ int main (int argc, char *argv[])
     }
     free (csplits);
   }
-
-  close (fd);
 
   free (splits);
   free (tsps);
