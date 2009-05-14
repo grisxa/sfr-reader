@@ -219,6 +219,8 @@ int main (int argc, char *argv[])
   else
     revert_offsets (offsets);
 
+  /* such zero lseek all around prevent program on Win32 to miss some data */
+  lseek (fd, 0, SEEK_CUR);
 /*
   if (read (fd, &sync, sizeof (int32_t)) == -1)
     perror ("read");
@@ -243,6 +245,7 @@ int main (int argc, char *argv[])
 	perror ("read");
       else
 	revert_group (&groups[k].group);
+      lseek (fd, 0, SEEK_CUR);
 
       if ((ptr =
 	   realloc (gdays,
@@ -265,6 +268,7 @@ int main (int argc, char *argv[])
 	  perror ("read");
 	else
 	  revert_gday (gdays + k * title->DaysNum + j);
+	lseek (fd, 0, SEEK_CUR);
       }
 
       if ((ptr =
@@ -297,6 +301,7 @@ int main (int argc, char *argv[])
 	perror ("read");
       else
 	revert_distance (distances + k);
+      lseek (fd, 0, SEEK_CUR);
 
       if ((ptr =
 	   bsearch (distances + k, distances, k, sizeof (struct Distance),
@@ -327,6 +332,7 @@ int main (int argc, char *argv[])
 	perror ("read");
       else
 	revert_cpoint (cpoints + k);
+      lseek (fd, 0, SEEK_CUR);
 
       if ((ptr =
 	   bsearch (cpoints + k, cpoints, k, sizeof (struct CPoint),
@@ -356,6 +362,7 @@ int main (int argc, char *argv[])
 	perror ("read");
       else
 	revert_team (teams + k);
+      lseek (fd, 0, SEEK_CUR);
 
       if ((ptr =
 	   bsearch (teams + k, teams, k, sizeof (struct Team),
@@ -386,6 +393,7 @@ int main (int argc, char *argv[])
 	perror ("read");
       else
 	revert_competitor (&comps[k].comp);
+      lseek (fd, 0, SEEK_CUR);
 
       if ((ptr =
 	   realloc (cdays,
@@ -407,7 +415,7 @@ int main (int argc, char *argv[])
 	  perror ("read");
 	else
 	  revert_cday (cdays + k * title->DaysNum + j);
-
+	lseek (fd, 0, SEEK_CUR);
       }
 
       if ((ptr =
@@ -437,6 +445,7 @@ int main (int argc, char *argv[])
 	perror ("read");
       else
 	revert_split (&splits[k].split);
+      lseek (fd, 0, SEEK_CUR);
 
       if ((ptr =
 	   realloc (tsps,
@@ -456,7 +465,7 @@ int main (int argc, char *argv[])
 	  perror ("read");
 	else
 	  revert_tsp (tsps + k * CHIP_RECS + j);
-
+	lseek (fd, 0, SEEK_CUR);
       }
 
       if ((ptr =

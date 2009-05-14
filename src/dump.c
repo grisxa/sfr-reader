@@ -107,6 +107,9 @@ int main (int argc, char *argv[])
     perror ("read");
 
   revert_offsets (&offsets);
+
+  /* such zero lseek all around prevent program on Win32 to miss some data */
+  lseek(fd, 0, SEEK_CUR);
   if (read (fd, &sync, sizeof (int32_t)) == -1)
     perror ("read");
   revert_l (sync);
@@ -125,6 +128,7 @@ int main (int argc, char *argv[])
 	revert_group (&group);
 	print_group (&group);
       }
+      lseek(fd, 0, SEEK_CUR);
       for (j = 0; j < title.DaysNum; j++) {
 	bzero (&gday, sizeof (struct GDayStr));
 	if (read (fd, &gday, sizeof (struct GDayStr)) == -1)
@@ -134,6 +138,7 @@ int main (int argc, char *argv[])
 	  if (gday.DistCode >= 0)
 	    print_gday (&gday);
 	}
+      lseek(fd, 0, SEEK_CUR);
       }
     }
   for (i = 0; i < sizeof (offsets.Distances) / sizeof (int32_t); i++)
@@ -149,6 +154,7 @@ int main (int argc, char *argv[])
 	revert_distance (&distance);
 	print_distance (&distance);
       }
+      lseek(fd, 0, SEEK_CUR);
     }
   for (i = 0; i < sizeof (offsets.CPoints) / sizeof (int32_t); i++)
     if (offsets.CPoints[i] > 0) {
@@ -163,6 +169,7 @@ int main (int argc, char *argv[])
 	revert_cpoint (&cpoint);
 	print_cpoint (&cpoint);
       }
+      lseek(fd, 0, SEEK_CUR);
     }
   for (i = 0; i < sizeof (offsets.Teams) / sizeof (int32_t); i++)
     if (offsets.Teams[i] > 0) {
@@ -177,6 +184,7 @@ int main (int argc, char *argv[])
 	revert_team (&team);
 	print_team (&team);
       }
+      lseek(fd, 0, SEEK_CUR);
     }
   for (i = 0; i < sizeof (offsets.Competitors) / sizeof (int32_t); i++)
     if (offsets.Competitors[i] > 0) {
@@ -191,6 +199,7 @@ int main (int argc, char *argv[])
 	revert_competitor (&comp);
 	print_competitor (&comp);
       }
+      lseek(fd, 0, SEEK_CUR);
       for (j = 0; j < title.DaysNum; j++) {
 	bzero (&cday, sizeof (struct CDayStr));
 	if (read (fd, &cday, sizeof (struct CDayStr)) == -1)
@@ -199,6 +208,7 @@ int main (int argc, char *argv[])
 	  revert_cday (&cday);
 	  print_cday (&cday);
 	}
+      lseek(fd, 0, SEEK_CUR);
       }
     }
   for (i = 0; i < sizeof (offsets.Splits) / sizeof (int32_t); i++)
@@ -214,6 +224,7 @@ int main (int argc, char *argv[])
 	revert_split (&split);
 	print_split (&split);
       }
+      lseek(fd, 0, SEEK_CUR);
       for (j = 0; j < split.recs; j++) {
 	bzero (&tsp, sizeof (struct Tsp));
 	if (read (fd, &tsp, sizeof (struct Tsp)) == -1)
@@ -223,6 +234,7 @@ int main (int argc, char *argv[])
 	  if (tsp.kp > 0)
 	    print_tsp (&tsp);
 	}
+        lseek(fd, 0, SEEK_CUR);
       }
     }
   close (fd);
