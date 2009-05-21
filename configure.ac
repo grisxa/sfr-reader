@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(sfr-reader, 0.1, bga@altlinux.org)
+AC_INIT(sfr-reader, 0.2, bga@altlinux.org)
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADERS([config.h])
 
