@@ -24,9 +24,6 @@
 #ifndef le32toh
 #  ifdef letoh32
 #    define le32toh(x) letoh32(x)
-#  elif defined(__APPLE__) /* Mac OS X */
-//#include <libkern/OSByteOrder.h>
-#    define le32toh(x) OSSwapLittleToHostInt32(x)
 #  elif defined(__le32_to_cpu)
 #    define le32toh(x) __le32_to_cpu(x)
 #  else
@@ -40,9 +37,6 @@
 #ifndef le16toh
 #  ifdef letoh16
 #    define le16toh(x) letoh16(x)
-#  elif defined(__APPLE__) /* Mac OS X */
-//#include <libkern/OSByteOrder.h>
-#    define le16toh(x) OSSwapLittleToHostInt16(x)
 #  elif defined(__le16_to_cpu)
 #    define le16toh(x) __le16_to_cpu(x)
 #  else
