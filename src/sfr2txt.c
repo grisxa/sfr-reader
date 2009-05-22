@@ -110,17 +110,21 @@ int split_comp_cmp (const void *a, const void *b)
 int csplit_cmp (const void *a, const void *b)
 {
   int32_t atime, btime;
-  if (((struct CSplit *) a)->cday->dsq && !((struct CSplit *) b)->cday->dsq)
+  struct CSplit *aa = (struct CSplit *) a, *bb = (struct CSplit *) b;
+  if (aa->cday->dsq && !bb->cday->dsq)
     return 1;
-  if (!((struct CSplit *) a)->cday->dsq && ((struct CSplit *) b)->cday->dsq)
+  if (!aa->cday->dsq && bb->cday->dsq)
     return -1;
-  atime =
-    ((struct CSplit *) a)->cday->Finish - ((struct CSplit *) a)->cday->Start;
-  btime =
-    ((struct CSplit *) b)->cday->Finish - ((struct CSplit *) b)->cday->Start;
+  atime = aa->cday->Finish - aa->cday->Start;
+  btime = bb->cday->Finish - bb->cday->Start;
   if (atime < btime)
     return -1;
-  return atime > btime;
+  if (atime > btime)
+    return 1;
+
+  if (aa->comp->comp.StNum < bb->comp->comp.StNum)
+    return -1;
+  return aa->comp->comp.StNum > bb->comp->comp.StNum;
 }
 
 int main (int argc, char *argv[])
